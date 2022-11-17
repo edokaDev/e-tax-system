@@ -4,15 +4,15 @@ from django.contrib.auth.models import AbstractUser, User
 
 # Create your models here.
 
-USER_TYPES = (
+USER_TYPES = [
     ('IND', 'Individual'),
     ('BIZ', 'Business'),
-)
+]
 
-ASSET_TYPES = (
+ASSET_TYPES = [
     ('HSE', 'House'),
     ('VEH', 'Vehicle'),
-)
+]
 
 class Address(models.Model):
     house_no = models.IntegerField()
@@ -25,15 +25,14 @@ class Address(models.Model):
 
 class User(AbstractUser):
     # payer
-    tin = models.CharField(max_length=10, null=True, blank=True)
+    tin = models.CharField(max_length=10, null=True, blank=True, )
     user_type = models.CharField(max_length=50, choices=USER_TYPES)
     is_cleared = models.BooleanField(default=False) 
     is_payer = models.BooleanField(default=False)
-    address = models.OneToOneField(Address, on_delete=models.CASCADE)
+    address = models.OneToOneField(Address, on_delete=models.CASCADE, null=True, blank=True)
     # admin
     is_active = models.BooleanField(default=True)
     # general
-    is_admin = models.BooleanField(default=False)
     phone = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
@@ -46,7 +45,6 @@ class Tcc(models.Model):
     request_date = models.DateTimeField(auto_now=True)
     start = models.DateField()
     end = models.DateField()
-    approver = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"TCC-00{self.pk}"
