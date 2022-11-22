@@ -25,7 +25,7 @@ class Address(models.Model):
 
 class User(AbstractUser):
     # payer
-    tin = models.CharField(max_length=10, null=True, blank=True, )
+    tin = models.CharField(max_length=10, null=True, blank=True)
     user_type = models.CharField(max_length=50, choices=USER_TYPES)
     is_cleared = models.BooleanField(default=False) 
     is_payer = models.BooleanField(default=False)
