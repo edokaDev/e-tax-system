@@ -1,4 +1,3 @@
-from hashlib import sha256
 import random
 
 from .models import User
@@ -11,3 +10,7 @@ def get_unique_tin():
     if len(check) > 0:
         return get_unique_tin()
     return f"{tin}"
+
+def process_payment():
+    # processing script
+    return True

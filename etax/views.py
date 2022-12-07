@@ -10,9 +10,11 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 
-from .models import User
+from .models import User, TaxPayment, Tcc, Address, Asset, AssetType
 
-from .utils import get_unique_tin
+from .utils import get_unique_tin, process_payment
+
+
 
 # Create your views here.
 
@@ -68,23 +70,135 @@ class IndexView(View):
             return HttpResponse('unsuccessful')
 
 
-
-
 def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
     return HttpResponseRedirect(reverse('etax:landing'))
 
 
-class DashboardView(LoginRequiredMixin, View):
+class DashboardView(View):
     login_url = '/'
     redirect_field_name = '/'
 
     def get(self, request):
+        title = 'Dashboard'
+        assets = Asset.objects.filter(owner=request.user)
+        assets_count = assets.count()
+        payments = TaxPayment.objects.filter(asset__owner=request.user)
+        asset_types = AssetType.objects.all()
+        ast_types = {}
+        for ast in asset_types:
+            ast_types[ast.name] = ast.rate * 100
+            # ast_types.append({'name': ast.name}, {'rate': ast.rate * 100})
+
         context = {
-            'title': 'Dashboard'
+            'title': title,
+            'assets_count': assets_count,
+            'payments': payments,
+            'asset_types': ast_types,
+            'segment': ['dashboard'],
         }
         return render(request, 'dashboard.html', context)
 
     def post(self, request):
-        return HttpResponse("Dashboard")
+        return HttpResponse("Dashboard: post")
+
+
+class TCCView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        title = 'TCC'
+
+        context = {
+            'title': title,
+            'segment': ['tcc'],
+        }
+        return render(request, 'tcc.html', context)
+
+    def post(self, request):
+        return HttpResponse("TCC: post")
+
+
+class AssetsView(View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        title = 'Assets'
+        assets = Asset.objects.filter(owner=request.user)
+        asset_types = AssetType.objects.all()
+        # fraud_count = transactions.filter(is_fraud=True).count()
+
+        context = {
+            'title': title,
+            'assets': assets,
+            'asset_types': asset_types,
+            'asset_count': assets.count(),
+            'segment': ['assets'],
+        }
+        return render(request, 'assets.html', context)
+
+    def post(self, request):
+        description = request.POST['description']
+        price = request.POST['price']
+        type_id = request.POST['type_id']
+
+        ast = Asset()
+        ast.owner = request.user
+        ast.description = description
+        ast.price = float(price)
+        ast.asset_type_id = type_id
+        ast.save()
+
+        return HttpResponseRedirect(reverse('etax:assets'))
+
+
+class PaymentView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        title = 'Payments'
+        payments = TaxPayment.objects.filter(asset__owner=request.user)
+
+        context = {
+            'title': title,
+            'payments': payments,
+            'segment': ['payments'],
+        }
+        return render(request, 'payments.html', context)
+
+    def post(self, request):
+        return HttpResponse("Payment: post")
+
+
+class MakePaymentView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request, asset_id):
+        title = 'Payments'
+        asset = Asset.objects.get(id=asset_id)
+        context = {
+            'title': title,
+            'asset': asset,
+            'segment': ['payments'],
+        }
+        return render(request, 'make_payment.html', context)
+
+    def post(self, request, asset_id):
+        asset = Asset.objects.get(id=asset_id)
+        
+        tx = TaxPayment()
+        tx.asset_id = asset_id
+        tx.amount = asset.tax_amount
+
+        if process_payment():
+            asset.tax_paid = True
+            tx.is_successful = True
+        asset.save()
+        tx.save()
+        return HttpResponseRedirect(reverse('etax:assets'))
+

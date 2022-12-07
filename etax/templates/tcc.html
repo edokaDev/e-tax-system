@@ -1,0 +1,30 @@
+{% extends "includes/base-dash.html" %}
+
+{% block title %} Transactions {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+      <div class="d-block mb-4 mb-md-0">
+          <h2 class="h4">TCC</h2>
+      </div>
+  </div>
+<div class="card border-0 shadow">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <label for="email">Enter Amount</label>
+            <input type="number" class="form-control" id="email" aria-describedby="emailHelp" name="amount">
+            <br>
+            <button class="btn btn-lg btn-primary" type="submit">submit</button>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

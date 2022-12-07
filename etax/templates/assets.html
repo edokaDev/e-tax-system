@@ -1,0 +1,108 @@
+{% extends "includes/base-dash.html" %}
+
+{% block title %} Transactions {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- Modal Content -->
+<div class="modal fade" id="modal-form-signup" tabindex="-1" role="dialog" aria-labelledby="modal-form-signup" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="card p-3 p-lg-4">
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        <h1 class="mb-0 h4">Add New Asset </h1>
+                    </div>
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <!-- Form -->
+                        <div class="form-group mb-4">
+                            <label for="email">Description</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Lexus RX350" name="description" autofocus required>
+                            </div>  
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="email">Purchase Price</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" placeholder="120000.00" name="price" autofocus required>
+                            </div>  
+                        </div>
+                        <div class="mb-4">
+                            <label class="my-1 me-2" for="type">Type</label>
+                            <select class="form-select" name="type_id" id="country" aria-label="Default select example" required>
+                                <option selected>Select Asset Type</option>
+                                {% for asset_type in asset_types %}
+                                <option value={{ asset_type.id }}>{{ asset_type.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-gray-800">Add Asset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of Modal Content -->
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+    <div class="d-block mb-4 mb-md-0">
+        <h2 class="h4">Assets</h2>
+        <p class="mb-0">{{ asset_count }} total</p>
+    </div>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <!-- Modal Button -->
+        <button type="button" class="btn btn-block btn-gray-800 mb-3" data-bs-toggle="modal" data-bs-target="#modal-form-signup">Add Asset</button>
+        <!-- End of Modal Button -->
+    </div>
+
+</div>
+<div class="row">
+    {% for asset in assets %}
+    <div class="col-12 col-sm-6 col-xl-4 mb-4">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="row d-block d-xl-flex align-items-center">
+                    <div class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                        <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
+                            <svg class="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
+                        </div>
+                        <div class="d-sm-none">
+                            <h2 class="h5">{{ asset.asset_type }}</h2>
+                            <h3 class="fw-extrabold mb-1">{{ asset.description }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-7 px-xl-0">
+                        <div class="d-none d-sm-block">
+                            <h2 class="h6 text-gray-400 mb-0">{{ asset.asset_type }}</h2>
+                            <h5 class="fw-extrabold mb-2">{{ asset.description }}</h5>
+                        </div>
+                        <small class="d-flex align-items-center text-gray-500">
+                            Added on: <b>{{ asset.added_on | date }}</b>
+                        </small>
+                        <small class="d-flex align-items-center text-gray-500">
+                            Purchase Price: <b>{{ asset.price }}</b>
+                        </small>
+                        {% if asset.tax_paid %}
+                        <button class="btn btn-success" type="button" disabled>Tax Paid!</button>
+                        {% else %}
+                        <a href="{% url 'etax:make-payment' asset_id=asset.id%}" class="btn btn-outline-primary mt-2" type="button">Make Tax Pay</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

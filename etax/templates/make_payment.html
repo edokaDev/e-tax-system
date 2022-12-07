@@ -1,0 +1,38 @@
+{% extends "includes/base-dash.html" %}
+
+{% block title %} Transactions {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+      <div class="d-block mb-4 mb-md-0">
+          <h2 class="h4">Tax Payment</h2>
+          <p class="mb-0">For Asset <b>{{ asset.description }}</b></p>
+        </div>
+  </div>
+<div class="card border-0 shadow">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <label for="email">Asset Description</label>
+            <input type="number" class="form-control mb-3" placeholder="{{ asset.description }}" disabled>
+            <label for="email">Asset Type</label>
+            <input type="number" class="form-control mb-3" placeholder="{{ asset.asset_type }}" disabled>
+            <label for="email">Purchase Price</label>
+            <input type="number" class="form-control mb-3" placeholder="{{ asset.price }}" disabled>
+            <label for="email">Tax Rate</label>
+            <input type="number" class="form-control mb-3" placeholder="{{ asset.get_rate_percentage }}%" disabled>
+            <label for="email">Amount to Pay</label>
+            <input type="number" class="form-control mb-3" placeholder="{{ asset.tax_amount }}" disabled>
+            <button class="btn btn-lg btn-primary" type="submit">Make Payment</button>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
