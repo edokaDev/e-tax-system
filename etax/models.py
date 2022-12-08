@@ -47,8 +47,12 @@ class Tcc(models.Model):
     start = models.DateField()
     end = models.DateField()
 
-    def __str__(self):
+    @property
+    def tcc_no(self):
         return f"TCC-00{self.pk}"
+
+    def __str__(self):
+        return self.tcc_no
 
 
 class AssetType(models.Model):

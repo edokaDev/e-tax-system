@@ -7,21 +7,115 @@
 
 {% block content %}
 
+<!-- Modal Content -->
+<div class="modal fade" id="modal-form-signup" tabindex="-1" role="dialog" aria-labelledby="modal-form-signup" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="card p-3 p-lg-4">
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        <h1 class="mb-0 h4">New TCC Request</h1>
+                    </div>
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <!-- Form -->
+                        <div class="form-group mb-4">
+                            <label for="start">Start Year</label>
+                            <select class="form-select" name="start" id="country" aria-label="Default select example" required>
+                                <option selected>Select start year</option>
+                                {% for year in years %}
+                                <option value={{ year }}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="end">End Year</label>
+                            <select class="form-select" name="end" id="country" aria-label="Default select example" required>
+                                <option selected>Select end year</option>
+                                {% for year in years %}
+                                <option value={{ year }}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-gray-800">Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of Modal Content -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+    <div class="d-block mb-4 mb-md-0">
+        <h2 class="h4">TCC</h2>
+        <p class="mb-0">Request Tax Clearance Certificate</p>
+    </div>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <!-- Modal Button -->
+        <button type="button" class="btn btn-block btn-gray-800 mb-3" data-bs-toggle="modal" data-bs-target="#modal-form-signup">Request TCC</button>
+        <!-- End of Modal Button -->
+    </div>
+</div>
 
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
-      <div class="d-block mb-4 mb-md-0">
-          <h2 class="h4">TCC</h2>
-      </div>
-  </div>
 <div class="card border-0 shadow">
     <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            <label for="email">Enter Amount</label>
-            <input type="number" class="form-control" id="email" aria-describedby="emailHelp" name="amount">
-            <br>
-            <button class="btn btn-lg btn-primary" type="submit">submit</button>
-        </form>
+        {% if tccs %}
+        <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+            <tr>
+                <th class="border-bottom" scope="col">TCC No</th>
+                <th class="border-bottom" scope="col">From</th>
+                <th class="border-bottom" scope="col">To</th>
+                <th class="border-bottom" scope="col">Status</th>
+                <th class="border-bottom" scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for tcc in tccs %}
+            <tr>
+                <th class="text-gray-900" scope="row">
+                    {{ tcc.tcc_no }}
+                </th>
+                <td class="fw-bolder text-gray-500">
+                    {{ tcc.start | date }}
+                </td>
+                <td class="fw-bolder text-gray-500">
+                    {{ tcc.end | date }}
+                </td>
+                <td class="fw-bolder text-gray-500">
+                    <div class="d-flex">
+                        <svg class="icon icon-xs text-{% if tcc.is_approved %}{% if tcc.is_expired %}danger{% else %}success{% endif %}{% else %}warning{% endif %} me-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                        {% if tcc.is_approved %}
+                            {% if tcc.is_expired %}
+                            Expired!
+                            {% else %}
+                            Approved
+                            {% endif %}
+                        {% else %}
+                        Pending Approval
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="fw-bolder text-gray-500">
+                    {% if tcc.is_approved %}
+                    <a href="#" class="btn btn-success btn-small">print</a>
+                    {% else %}
+                    No action
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+            <!-- Display TCC Request Table -->
+
+        {% else %}
+        <!-- No TCC Yet -->
+        <p class="mt-4 mb-4 text-center">You haven't made any TCC request yet!!!</p>
+        {% endif %}
     </div>
 </div>
 {% endblock content %}

@@ -14,6 +14,8 @@ from .models import User, TaxPayment, Tcc, Address, Asset, AssetType
 
 from .utils import get_unique_tin, process_payment
 
+from datetime import date
+
 
 
 # Create your views here.
@@ -110,15 +112,29 @@ class TCCView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'TCC'
+        tccs = Tcc.objects.filter(owner=request.user)
+        years = [i for i in range(2017, 2023)]
 
         context = {
             'title': title,
             'segment': ['tcc'],
+            'years': years,
+            'tccs': tccs,
         }
         return render(request, 'tcc.html', context)
 
     def post(self, request):
-        return HttpResponse("TCC: post")
+        start = request.POST['start']
+        end = request.POST['end']
+
+        tcc = Tcc()
+        tcc.owner = request.user
+        tcc.start = date(int(start), 1, 1)
+        tcc.end = date(int(end), 12, 31)
+        tcc.save()
+
+
+        return HttpResponseRedirect(reverse('etax:tcc'))
 
 
 class AssetsView(View):
