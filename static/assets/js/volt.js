@@ -173,10 +173,12 @@ d.addEventListener("DOMContentLoaded", function(event) {
 
     if(d.querySelector('.ct-chart-sales-value')) {
         //Chart 5
+        // console.log(x_labels)
+        // console.log( y_labels)
           new Chartist.Line('.ct-chart-sales-value', {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            labels: x_label,
             series: [
-                [0, 10, 30, 40, 80, 60, 100]
+                y_label
             ]
           }, {
             low: 0,
@@ -193,9 +195,9 @@ d.addEventListener("DOMContentLoaded", function(event) {
             axisY: {
                 // On the y-axis start means left and end means right
                 showGrid: false,
-                showLabel: false,
+                showLabel: true,
                 labelInterpolationFnc: function(value) {
-                    return '$' + (value / 1) + 'k';
+                    return 'N' + (value / 1000) + 'k';
                 }
             }
         });

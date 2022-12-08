@@ -15,6 +15,7 @@ from .models import User, TaxPayment, Tcc, Address, Asset, AssetType
 from .utils import get_unique_tin, process_payment
 
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 
 
@@ -231,13 +232,44 @@ class AdminDashboardView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('etax:home'))
         title = 'Admin Dashboard'
         assets = Asset.objects.all()
-        assets_count = assets.count()
         payments = TaxPayment.objects.all().order_by('-date')
         asset_types = AssetType.objects.all()
         ast_types = {}
         for ast in asset_types:
             ast_types[ast.name] = ast.rate * 100
         
+
+        d = date.today()
+        days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        days_date = [d - relativedelta(days = x) for x in range(8)]
+
+
+        labels = {
+            days[x.weekday()]: get_total_per_day(
+                TaxPayment.objects.filter(
+                    date__year=x.year,
+                    date__month=x.month,
+                    date__day=x.day,
+                    is_successful=True
+                    )) for x in days_date
+        }
+
+        
+
+        x_labels = [x for x,y in labels.items()]
+        y_labels = [y for x,y in labels.items()]
+
+        today_total = 0
+        for amount in y_labels:
+            today_total += amount
+
+        # print(x_labels)
+        # print(y_labels)
+        # for day, amount in labels.items():
+        #     print(day, amount)
+        x_labels.reverse()
+        y_labels.reverse()
+
         card_items = {
             'Individuals': User.objects.filter(user_type='IND').count(),
             'Businesses': User.objects.filter(user_type='BIZ').count(),
@@ -247,11 +279,13 @@ class AdminDashboardView(LoginRequiredMixin, View):
 
         context = {
             'title': title,
-            'assets_count': assets_count,
             'payments': payments,
             'asset_types': ast_types,
             'segment': ['dashboard'],
             'card_items': card_items,
+            'x_labels': x_labels,
+            'y_labels': y_labels,
+            'today_amount': today_total,
         }
         return render(request, 'dashboard.html', context)
 
@@ -277,3 +311,10 @@ class ApproveTccView(LoginRequiredMixin, View):
         tcc.is_approved = True
         tcc.save()
         return HttpResponseRedirect(reverse('etax:tcc'))
+
+
+def get_total_per_day(queryset):
+    sum = 0
+    for tx in queryset:
+        sum += tx.amount
+    return sum
