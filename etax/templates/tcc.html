@@ -50,7 +50,15 @@
 <!-- End of Modal Content -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
     <div class="d-block mb-4 mb-md-0">
-        <h2 class="h4">TCC</h2>
+        <h2 class="h4">
+            {% if request.user.is_staff %}
+            TCC Request
+        </h2>
+    </div>
+</div>          
+            {% else %}
+            TCC
+        </h2>
         <p class="mb-0">Request Tax Clearance Certificate</p>
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
@@ -59,6 +67,7 @@
         <!-- End of Modal Button -->
     </div>
 </div>
+{% endif %}
 
 <div class="card border-0 shadow">
     <div class="card-body">
@@ -67,8 +76,12 @@
             <thead class="thead-light">
             <tr>
                 <th class="border-bottom" scope="col">TCC No</th>
+                {% if request.user.is_payer %}
                 <th class="border-bottom" scope="col">From</th>
                 <th class="border-bottom" scope="col">To</th>
+                {% else %}
+                <th class="border-bottom" scope="col">Owner</th>
+                {% endif %}
                 <th class="border-bottom" scope="col">Status</th>
                 <th class="border-bottom" scope="col">Actions</th>
             </tr>
@@ -79,12 +92,19 @@
                 <th class="text-gray-900" scope="row">
                     {{ tcc.tcc_no }}
                 </th>
+                {% if request.user.is_payer %}
                 <td class="fw-bolder text-gray-500">
                     {{ tcc.start | date }}
                 </td>
                 <td class="fw-bolder text-gray-500">
                     {{ tcc.end | date }}
                 </td>
+                {% else %}
+                <td class="fw-bolder text-gray-500">
+                    {{ tcc.owner }}
+                </td>
+                {% endif %}
+
                 <td class="fw-bolder text-gray-500">
                     <div class="d-flex">
                         <svg class="icon icon-xs text-{% if tcc.is_approved %}{% if tcc.is_expired %}danger{% else %}success{% endif %}{% else %}warning{% endif %} me-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
@@ -99,11 +119,22 @@
                         {% endif %}
                     </div>
                 </td>
-                <td class="fw-bolder text-gray-500">
+                <td class="fw-bolder text-gray-500 d-flex">
                     {% if tcc.is_approved %}
-                    <a href="#" class="btn btn-success btn-small">print</a>
+                        {% if request.user.is_payer %}
+                    <a href="#" class="btn btn-success btn-small">
+                        print
+                    </a>
+                        {% else %}
+                        No action!
+                        {% endif %}
                     {% else %}
-                    No action
+                        {% if request.user.is_staff %}
+                        <a href="{% url 'etax:approve_tcc' tcc_id=tcc.id %}" class="btn me-2 btn-success btn-small">Approve</a>
+                        <a href="{% url 'etax:delete_tcc'  tcc_id=tcc.id %}" class="btn btn-danger btn-small">Delete</a>
+                        {% else %}
+                            No action
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
@@ -114,7 +145,11 @@
 
         {% else %}
         <!-- No TCC Yet -->
-        <p class="mt-4 mb-4 text-center">You haven't made any TCC request yet!!!</p>
+            {% if request.user.is_staff %}
+            <p class="mt-4 mb-4 text-center">No TCC request yet!!!</p>
+            {% else %}
+            <p class="mt-4 mb-4 text-center">You haven't made any TCC request yet!!!</p>
+            {% endif %}
         {% endif %}
     </div>
 </div>

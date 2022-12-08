@@ -112,7 +112,10 @@ class TCCView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'TCC'
-        tccs = Tcc.objects.filter(owner=request.user)
+        if request.user.is_staff:
+            tccs = Tcc.objects.all()
+        else:
+            tccs = Tcc.objects.filter(owner=request.user)
         years = [i for i in range(2017, 2023)]
 
         context = {
@@ -218,3 +221,59 @@ class MakePaymentView(LoginRequiredMixin, View):
         tx.save()
         return HttpResponseRedirect(reverse('etax:assets'))
 
+
+class AdminDashboardView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        if not request.user.is_staff:
+            return HttpResponseRedirect(reverse('etax:home'))
+        title = 'Admin Dashboard'
+        assets = Asset.objects.all()
+        assets_count = assets.count()
+        payments = TaxPayment.objects.all().order_by('-date')
+        asset_types = AssetType.objects.all()
+        ast_types = {}
+        for ast in asset_types:
+            ast_types[ast.name] = ast.rate * 100
+        
+        card_items = {
+            'Individuals': User.objects.filter(user_type='IND').count(),
+            'Businesses': User.objects.filter(user_type='BIZ').count(),
+            'Cleared Assets': assets.filter(tax_paid=True).count(),
+            'Pending TCC Requests': Tcc.objects.filter(is_approved=False).count(),
+        }
+
+        context = {
+            'title': title,
+            'assets_count': assets_count,
+            'payments': payments,
+            'asset_types': ast_types,
+            'segment': ['dashboard'],
+            'card_items': card_items,
+        }
+        return render(request, 'dashboard.html', context)
+
+    def post(self, request):
+        return HttpResponse("Dashboard: post")
+
+
+class DeleteTccView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request, tcc_id):
+        tcc = Tcc.objects.get(id=tcc_id)
+        tcc.delete()
+        return HttpResponseRedirect(reverse('etax:tcc'))
+
+class ApproveTccView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request, tcc_id):
+        tcc = Tcc.objects.get(pk=tcc_id)
+        tcc.is_approved = True
+        tcc.save()
+        return HttpResponseRedirect(reverse('etax:tcc'))

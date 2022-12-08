@@ -41,7 +41,11 @@
                 </a>
               </li>
               <li class="nav-item {% if 'dashboard' in segment %} active {% endif %}">
+                {% if request.user.is_staff %}
+                <a href="{% url 'etax:admin_dashboard' %}" class="nav-link">
+                    {% else %}
                 <a href="{% url 'etax:dashboard' %}" class="nav-link">
+                {% endif %}
                   <span class="sidebar-icon">
                     <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
                   </span> 
@@ -53,9 +57,16 @@
                   <span class="sidebar-icon">
                     <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
                   </span> 
-                  <span class="sidebar-text">TCC</span>
+                  <span class="sidebar-text">
+                    {% if request.user.is_staff %}
+                    TCC Request
+                    {% else %}
+                    TCC
+                    {% endif %}
+                </span>
                 </a>
               </li>
+              {% if request.user.is_payer %}
               <li class="nav-item {% if 'assets' in segment %} active {% endif %}">
                 <a href="{% url 'etax:assets' %}" class="nav-link">
                   <span class="sidebar-icon">
@@ -64,6 +75,7 @@
                   <span class="sidebar-text">Assets</span>
                 </a>
               </li>
+              {% endif %}
               <li class="nav-item {% if 'payments' in segment %} active {% endif %}">
                 <a href="{% url 'etax:payments' %}" class="nav-link">
                   <span class="sidebar-icon">
